@@ -9,7 +9,18 @@
       "Productivity",
       "Timer",
       "Tool"
-    ],
-    "date": "2025-01-01"
+    ]
+  },
+  {
+    "id": "tetris",
+    "title": "TetraFlux",
+    "path": "./fragments/TetraFlux.html",
+    "description": "A feature-rich Tetris clone with ghost pieces, hard drops, and mobile-first touch controls using the Catppuccin palette.",
+    "color": "#cba6f7",
+    "tags": [
+      "Game",
+      "Arcade",
+      "Mobile"
+    ]
   }
 ]
