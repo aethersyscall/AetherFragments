@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AetherSyscall // Fragments</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      /* CATPPUCCIN MOCHA PALETTE */
+      --rosewater: #f5e0dc;
+      --flamingo: #f2cdcd;
+      --pink: #f5c2e7;
+      --mauve: #cba6f7;
+      --red: #f38ba8;
+      --maroon: #eba0ac;
+      --peach: #fab387;
+      --yellow: #f9e2af;
+      --green: #a6e3a1;
+      --teal: #94e2d5;
+      --sky: #89dceb;
+      --sapphire: #74c7ec;
+      --blue: #89b4fa;
+      --lavender: #b4befe;
+
+      --text: #cdd6f4;
+      --subtext1: #bac2de;
+      --subtext0: #a6adc8;
+      --overlay2: #9399b2;
+      --overlay1: #7f849c;
+      --overlay0: #6c7086;
+
+      --base: #1e1e2e;
+      --mantle: #181825;
+      --crust: #11111b;
+      --surface0: #313244;
+      --surface1: #45475a;
+      --surface2: #585b70;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--base);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* --- Hero Section --- */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 4rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid var(--mauve);
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 20px rgba(203, 166, 247, 0.3);
+      object-fit: cover;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(45deg, var(--mauve), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--subtext0);
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* --- GitHub Button --- */
+    .btn-github {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background-color: var(--surface0);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      border: 1px solid var(--surface1);
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .btn-github:hover {
+      background-color: var(--surface1);
+      border-color: var(--mauve);
+      transform: translateY(-2px);
+    }
+
+    /* --- Warning Callout --- */
+    .warning-box {
+      margin-top: 2rem;
+      background-color: rgba(243, 139, 168, 0.1);
+      /* Red alpha */
+      border: 1px solid var(--red);
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      text-align: left;
+    }
+
+    .warning-icon {
+      color: var(--red);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .warning-content {
+      font-size: 0.9rem;
+      color: var(--subtext0);
+      line-height: 1.5;
+    }
+
+    .warning-content strong {
+      color: var(--red);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* --- Search Bar --- */
+    .search-container {
+      margin-top: 2rem;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 15px 20px 15px 50px;
+      background-color: var(--mantle);
+      border: 2px solid var(--surface0);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      font-family: 'Outfit', sans-serif;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--blue);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--overlay0);
+      pointer-events: none;
+    }
+
+    /* --- Grid --- */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      flex: 1;
+    }
+
+    .card {
+      background-color: var(--mantle);
+      border: 1px solid var(--surface0);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-decoration: none;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: var(--mauve);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .card-desc {
+      color: var(--subtext0);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      background-color: var(--surface0);
+      color: var(--subtext1);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--overlay0);
+      padding: 3rem;
+      display: none;
+    }
+
+    /* --- Footer --- */
+    footer {
+      margin-top: auto;
+      padding: 2rem;
+      color: var(--overlay0);
+      font-size: 0.85rem;
+      text-align: center;
+      border-top: 1px solid var(--surface0);
+      width: 100%;
+    }
+
+    footer span {
+      color: var(--mauve);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HERO -->
+  <div class="hero">
+    <img src="https://avatars.githubusercontent.com/u/251496121?v=4" alt="AetherSyscall" class="avatar">
+    <h1>AetherSyscall</h1>
+    <div class="subtitle">Fragments // Experimental Library</div>
+
+    <!-- GITHUB LINK -->
+    <a href="https://github.com/AetherSyscall" target="_blank" class="btn-github">
+      <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
+        <path
+          d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+        </path>
+      </svg>
+      GitHub Profile
+    </a>
+  </div>
+
+  <!-- WARNING CALLOUT -->
+  <div class="warning-box">
+    <div class="warning-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </div>
+    <div class="warning-content">
+      <strong>Experimental Territory</strong>
+      This library is a testing ground. Tools hosted here may undergo sudden rewrites, deletion, or updates without
+      notice.
+      If you wish to use a tool daily, please <b>download the HTML file</b> from the repository and run it locally.
+    </div>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="search-container">
+    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input type="text" id="search" class="search-input" placeholder="Search fragments...">
+  </div>
+
+  <!-- CARDS GRID -->
+  <div class="grid-container" id="grid">
+    <!-- Cards injected by JS -->
+    <div class="empty-state">No fragments found.</div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    &copy; AetherSyscall. Theme: Catppuccin Mocha.
+  </footer>
+
+  <script>
+    let allFragments = [];
+
+    async function init() {
+      const grid = document.getElementById('grid');
+      const searchInput = document.getElementById('search');
+      const emptyState = document.querySelector('.empty-state');
+
+      try {
+        // Fetch Data
+        const res = await fetch('./fragments.json');
+        if (!res.ok) throw new Error('Failed to load JSON');
+        allFragments = await res.json();
+
+        // Render Initial
+        render(allFragments);
+
+        // Search Listener
+        searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase();
+          const filtered = allFragments.filter(item =>
+            item.title.toLowerCase().includes(query) ||
+            item.description.toLowerCase().includes(query) ||
+            item.tags.some(tag => tag.toLowerCase().includes(query))
+          );
+          render(filtered);
+        });
+
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = '<div style="color:var(--red); text-align:center; grid-column: 1/-1;">Error accessing fragment memory.</div>';
+      }
+    }
+
+    function render(items) {
+      const grid = document.getElementById('grid');
+      const emptyState = document.querySelector('.empty-state');
+
+      // Remove old cards (keep empty state div)
+      Array.from(grid.children).forEach(child => {
+        if (!child.classList.contains('empty-state')) grid.removeChild(child);
+      });
+
+      if (items.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      } else {
+        emptyState.style.display = 'none';
+      }
+
+      items.forEach(item => {
+        const card = document.createElement('a');
+        card.href = item.path;
+        card.className = 'card';
+
+        // Mouse enter/leave for dynamic border color based on JSON color
+        card.addEventListener('mouseenter', () => card.style.borderColor = item.color || 'var(--mauve)');
+        card.addEventListener('mouseleave', () => card.style.borderColor = 'var(--surface0)');
+
+        const tagsHtml = item.tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+        card.innerHTML = `
+                    <div class="card-top">
+                        <span class="card-title">${item.title}</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${item.color || 'var(--text)'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </div>
+                    <p class="card-desc">${item.description}</p>
+                    <div class="card-tags">
+                        ${tagsHtml}
+                    </div>
+                `;
+        grid.appendChild(card);
+      });
+    }
+
+    init();
+  </script>
+</body>
+
+</html>

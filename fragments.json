@@ -1,0 +1,15 @@
+[
+  {
+    "id": "pomo",
+    "title": "PomoAether",
+    "path": "./fragments/PomoAether.html",
+    "description": "A fully self-contained, aesthetic Pomodoro timer featuring task tracking and spatial audio notifications.",
+    "color": "#FF7F50",
+    "tags": [
+      "Productivity",
+      "Timer",
+      "Tool"
+    ],
+    "date": "2025-01-01"
+  }
+]
