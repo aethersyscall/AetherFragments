@@ -2,7 +2,7 @@
 
 A collection of self-contained HTML experiments, tools, and UI fragments.
 
-[🌐 Live Here](aethersyscall.github.io/AetherFragments)
+[🌐 Live Here](https://aethersyscall.github.io/AetherFragments)
 
 ### ⚠ Experimental Status
 This is a live testing environment. Files here (`/fragments`) may be updated, broken, or deleted at any time without versioning support.
