@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AetherCalculus | Engineering Console</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* AETHER AMETHYST: ECLIPSE PALETTE */
+    :root {
+      --bg-deep: #13111B;
+      --bg-surface: #1B1824;
+      --bg-element: #252130;
+      --bg-active: #2F2942;
+      
+      --fg-primary: #EDE8F5;
+      --fg-secondary: #9B94A8;
+      
+      --syn-keyword: #9580FF; /* Logic (Blue-Violet) */
+      --syn-function: #FF70B8; /* Action (Neon Pink) */
+      --syn-type: #D2A8FF;    /* Structure (Soft Purple) */
+      --syn-string: #FF9CE6;  /* Content (Rose) */
+      --syn-number: #C26BFF;  /* Math (Vivid Violet) */
+      --syn-operator: #80FFEA; /* Flow (Cyan) */
+      
+      --border: #2E283B;
+      --glow: rgba(149, 128, 255, 0.2);
+      
+      --font-ui: 'Outfit', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      height: 100dvh;
+      background-color: var(--bg-deep);
+      color: var(--fg-primary);
+      font-family: var(--font-code);
+      font-size: 14px;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      background: var(--bg-deep);
+    }
+
+    /* HEADER */
+    header {
+      background-color: var(--bg-surface);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      z-index: 10;
+    }
+
+    .brand {
+      font-family: var(--font-ui);
+      font-weight: 800;
+      font-size: 1.2em;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--syn-keyword), var(--syn-function));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-bar {
+      display: flex;
+      gap: 8px;
+    }
+
+    .badge {
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 99px;
+      background: var(--bg-element);
+      color: var(--fg-secondary);
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .badge.active {
+      background: var(--bg-active);
+      color: var(--syn-keyword);
+      border-color: var(--syn-keyword);
+      box-shadow: 0 0 10px var(--glow);
+    }
+
+    .badge:active { transform: scale(0.95); }
+
+    /* TERMINAL */
+    #terminal {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    #terminal::-webkit-scrollbar { width: 4px; }
+    #terminal::-webkit-scrollbar-thumb { background: var(--bg-active); }
+
+    .log-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      animation: fadeUp 0.2s ease-out;
+      border-left: 2px solid var(--bg-element);
+      padding-left: 12px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .log-in {
+      color: var(--fg-secondary);
+      font-size: 0.9em;
+      display: flex;
+      gap: 8px;
+    }
+
+    .log-in::before {
+      content: "➜";
+      color: var(--syn-keyword);
+    }
+
+    .log-out {
+      color: var(--syn-operator);
+      font-weight: 600;
+      font-size: 1.3em;
+      cursor: pointer;
+      text-shadow: 0 0 15px rgba(128, 255, 234, 0.1);
+    }
+
+    .log-out:active { opacity: 0.6; }
+
+    .log-err {
+      color: var(--syn-function);
+      font-style: italic;
+    }
+
+    .log-sys {
+      color: var(--syn-type);
+      font-family: var(--font-ui);
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+
+    /* INPUT AREA */
+    #input-area {
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+      z-index: 20;
+    }
+
+    .cmd-line {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-deep);
+    }
+
+    .prompt {
+      color: var(--syn-function);
+      font-weight: bold;
+    }
+
+    #cmd-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--fg-primary);
+      font-family: var(--font-code);
+      font-size: 1.1rem;
+      padding: 4px 0;
+      caret-color: var(--syn-function);
+    }
+
+    /* KEYPAD */
+    .func-toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      background: var(--bg-surface);
+    }
+    .func-toolbar::-webkit-scrollbar { height: 0; width: 0; }
+
+    .f-btn {
+      background: var(--bg-element);
+      color: var(--syn-function);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      font-family: var(--font-code);
+      flex-shrink: 0;
+      transition: all 0.1s;
+    }
+    .f-btn.f-structure { color: var(--syn-operator); border-color: var(--syn-operator); }
+    .f-btn.eng { color: var(--syn-type); }
+    .f-btn:active { background: var(--bg-active); transform: translateY(2px); }
+
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      background: var(--border); 
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .k-btn {
+      background: var(--bg-surface);
+      border: none;
+      color: var(--fg-primary);
+      font-size: 1.2rem;
+      padding: 20px 0;
+      cursor: pointer;
+      font-family: var(--font-code);
+      transition: background 0.1s;
+    }
+
+    .k-btn:active { background: var(--bg-active); }
+
+    .k-op { color: var(--syn-operator); background: var(--bg-element); }
+    .k-const { color: var(--syn-keyword); }
+    .k-unit { color: var(--syn-type); font-size: 1rem; }
+    
+    .k-del { color: var(--syn-function); background: var(--bg-element); }
+
+    .execute-bar {
+        padding: 0 16px 16px 16px; 
+        background: var(--bg-surface);
+        display: flex;
+    }
+
+    .btn-exec {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, var(--syn-keyword), var(--syn-function));
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-family: var(--font-ui);
+        font-weight: 800;
+        font-size: 1rem;
+        letter-spacing: 1px;
+        cursor: pointer;
+        box-shadow: 0 5px 20px var(--glow);
+        transition: transform 0.1s;
+    }
+    .btn-exec:active { transform: scale(0.98); }
+
+    @media (min-width: 600px) {
+      .keypad-grid { gap: 8px; padding: 12px; background: var(--bg-surface); }
+      .k-btn { border-radius: 8px; background: var(--bg-element); border: 1px solid var(--border); }
+      .k-btn:hover { border-color: var(--syn-keyword); }
+      .k-op { background: var(--bg-active); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app">
+    <header>
+      <div class="brand">AetherCalculus</div>
+      <div class="status-bar">
+        <div id="mode-badge" class="badge active" onclick="engine.toggleMode()">DEG</div>
+        <div class="badge" onclick="engine.clear()">CLR</div>
+      </div>
+    </header>
+
+    <div id="terminal"></div>
+
+    <div id="input-area">
+      <div class="cmd-line">
+        <span class="prompt">❯</span>
+        <input type="text" id="cmd-input" placeholder="..." autocomplete="off">
+      </div>
+
+      <div class="func-toolbar prevent-focus-zone">
+        <!-- Structural Brackets (Flow Cyan) -->
+        <button class="f-btn f-structure" onclick="engine.insert('(')">(</button>
+        <button class="f-btn f-structure" onclick="engine.insert(')')">)</button>
+        
+        <!-- Scientific Functions (Logic Pink) -->
+        <button class="f-btn" onclick="engine.insert('sin(')">sin</button>
+        <button class="f-btn" onclick="engine.insert('cos(')">cos</button>
+        <button class="f-btn" onclick="engine.insert('tan(')">tan</button>
+        <button class="f-btn" onclick="engine.insert('log(')">log</button>
+        <button class="f-btn" onclick="engine.insert('ln(')">ln</button>
+        <button class="f-btn" onclick="engine.insert('sqrt(')">sqrt</button>
+        <button class="f-btn eng" onclick="engine.insert('par(')">par</button>
+        <button class="f-btn eng" onclick="engine.insert('diff(')">diff</button>
+        <button class="f-btn eng" onclick="engine.insert('integ(')">integ</button>
+        <button class="f-btn" onclick="engine.insert('ans')">ans</button>
+      </div>
+
+      <div class="keypad-grid prevent-focus-zone">
+        <!-- R1 -->
+        <button class="k-btn k-unit" onclick="engine.insert('G')">G</button>
+        <button class="k-btn k-unit" onclick="engine.insert('M')">M</button>
+        <button class="k-btn k-unit" onclick="engine.insert('k')">k</button>
+        <button class="k-btn k-op" onclick="engine.insert('^')">^</button>
+        <button class="k-btn k-del" onclick="engine.backspace()">⌫</button>
+
+        <!-- R2 -->
+        <button class="k-btn k-unit" onclick="engine.insert('m')">m</button>
+        <button class="k-btn" onclick="engine.insert('7')">7</button>
+        <button class="k-btn" onclick="engine.insert('8')">8</button>
+        <button class="k-btn" onclick="engine.insert('9')">9</button>
+        <button class="k-btn k-op" onclick="engine.insert('/')">/</button>
+
+        <!-- R3 -->
+        <button class="k-btn k-unit" onclick="engine.insert('μ')">μ</button>
+        <button class="k-btn" onclick="engine.insert('4')">4</button>
+        <button class="k-btn" onclick="engine.insert('5')">5</button>
+        <button class="k-btn" onclick="engine.insert('6')">6</button>
+        <button class="k-btn k-op" onclick="engine.insert('*')">*</button>
+
+        <!-- R4 -->
+        <button class="k-btn k-unit" onclick="engine.insert('n')">n</button>
+        <button class="k-btn" onclick="engine.insert('1')">1</button>
+        <button class="k-btn" onclick="engine.insert('2')">2</button>
+        <button class="k-btn" onclick="engine.insert('3')">3</button>
+        <button class="k-btn k-op" onclick="engine.insert('-')">-</button>
+
+        <!-- R5 -->
+        <button class="k-btn k-const" onclick="engine.insert('pi')">π</button>
+        <button class="k-btn k-const" onclick="engine.insert('e')">e</button>
+        <button class="k-btn" onclick="engine.insert('0')">0</button>
+        <button class="k-btn" onclick="engine.insert('.')">.</button>
+        <button class="k-btn k-op" onclick="engine.insert('+')">+</button>
+      </div>
+
+      <div class="execute-bar">
+        <button class="btn-exec" onclick="engine.process()">CALCULATE</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * AETHER CALCULUS v3.1 [PATCHED]
+     * Fixed: Scientific notation / Suffix collision
+     */
+    class Engine {
+      constructor() {
+        this.state = {
+          mode: 'DEG',
+          history: [],
+          ptr: -1,
+          ans: 0,
+          cursor: 0 
+        };
+        this.dom = {
+          input: document.getElementById('cmd-input'),
+          terminal: document.getElementById('terminal'),
+          badge: document.getElementById('mode-badge')
+        };
+        this.init();
+      }
+
+      // --- Math Kernel ---
+      
+      // Patched: Uses raw multipliers to prevent "cleanSyntax" from breaking scientific 'e'
+      parseSuffixes(expr) {
+        const suffixes = {
+            'T': '*1000000000000', 
+            'G': '*1000000000', 
+            'M': '*1000000', 
+            'k': '*1000', 
+            'm': '*0.001', 
+            'u': '*0.000001', 
+            'μ': '*0.000001', 
+            'n': '*0.000000001', 
+            'p': '*0.000000000001'
+        };
+        return expr.replace(/(\d*\.?\d+)([TGMkmuμnp])(?!\w)/g, (m, n, u) => `(${n}${suffixes[u]})`);
+      }
+
+      // Patched: Added negative lookahead (?!e[+-]?\d) to protect scientific notation
+      cleanSyntax(expr) {
+        // 1. Implied multiplication for digits: 2pi -> 2*pi (ignoring scientific 'e')
+        expr = expr.replace(/(\d)\s*(?!e[+-]?\d)([a-zA-Z(])/g, '$1*$2');
+        // 2. Implied multiplication for brackets: (2)3 -> (2)*3
+        expr = expr.replace(/(\))\s*(\d|[a-zA-Z(])/g, '$1*$2');
+        // 3. Power operator normalization
+        expr = expr.replace(/\^/g, '**');
+        return expr;
+      }
+
+      snap(val) {
+        const epsilon = 1e-10;
+        if (Math.abs(val) < epsilon) return 0;
+        if (Math.abs(val - Math.round(val)) < epsilon) return Math.round(val);
+        return val;
+      }
+
+      degToRad(d) {return d * (Math.PI / 180);}
+      radToDeg(r) {return r * (180 / Math.PI);}
+
+      getScope() {
+        const isDeg = this.state.mode === 'DEG';
+        return {
+          pi: Math.PI, e: Math.E, phi: 1.6180339887, ans: this.state.ans,
+          sqrt: Math.sqrt, abs: Math.abs, log: Math.log10, ln: Math.log, exp: Math.exp, pow: Math.pow,
+          sin: (x) => this.snap(Math.sin(isDeg ? this.degToRad(x) : x)),
+          cos: (x) => this.snap(Math.cos(isDeg ? this.degToRad(x) : x)),
+          tan: (x) => (isDeg && Math.abs(x % 180) === 90) ? Infinity : this.snap(Math.tan(isDeg ? this.degToRad(x) : x)),
+          asin: (x) => this.snap(isDeg ? this.radToDeg(Math.asin(x)) : Math.asin(x)),
+          acos: (x) => this.snap(isDeg ? this.radToDeg(Math.acos(x)) : Math.acos(x)),
+          atan: (x) => this.snap(isDeg ? this.radToDeg(Math.atan(x)) : Math.atan(x)),
+          par: (...a) => a.length ? this.snap(1 / a.reduce((s, r) => s + (1 / r), 0)) : 0,
+          diff: (s, x) => {
+            const h = 1e-5, f = (v) => this.evalRaw(s, v);
+            return this.snap((f(x + h) - f(x - h)) / (2 * h));
+          },
+          integ: (s, a, b, n = 100) => {
+            if (n % 2 !== 0) n++; const h = (b - a) / n, f = (v) => this.evalRaw(s, v);
+            let sum = f(a) + f(b); for (let i = 1; i < n; i++) sum += (i % 2 === 0 ? 2 : 4) * f(a + i * h);
+            return this.snap((h / 3) * sum);
+          }
+        };
+      }
+
+      evalRaw(expr, xVar = null) {
+        if (xVar !== null) expr = expr.replace(/\bx\b/g, `(${xVar})`);
+        expr = this.parseSuffixes(expr);
+        expr = this.cleanSyntax(expr);
+        const scope = this.getScope();
+        try {
+          return new Function(...Object.keys(scope), `return ${expr};`)(...Object.values(scope));
+        } catch (e) {throw new Error("Syntax");}
+      }
+
+      // --- Input Management ---
+
+      updateCursor() {
+        this.state.cursor = this.dom.input.selectionStart;
+      }
+
+      insert(txt) {
+        const field = this.dom.input;
+        let start = this.state.cursor;
+        const val = field.value;
+        field.value = val.substring(0, start) + txt + val.substring(start);
+        this.state.cursor += txt.length;
+        field.setSelectionRange(this.state.cursor, this.state.cursor);
+        field.scrollLeft = field.scrollWidth;
+      }
+
+      backspace() {
+        const field = this.dom.input;
+        let start = this.state.cursor;
+        if (start === 0) return;
+        field.value = field.value.substring(0, start - 1) + field.value.substring(start);
+        this.state.cursor--;
+        field.setSelectionRange(this.state.cursor, this.state.cursor);
+      }
+
+      // --- Processing ---
+
+      process() {
+        const raw = this.dom.input.value.trim();
+        if (!raw) return;
+
+        this.state.history.push(raw);
+        this.state.ptr = this.state.history.length;
+
+        const cmd = raw.toLowerCase();
+        if (cmd === 'clear') return this.clear();
+
+        try {
+          const res = this.evalRaw(raw);
+          if (res === undefined || isNaN(res)) throw new Error("Result Undefined");
+          this.state.ans = res;
+
+          let display = res;
+          if (typeof res === 'number') {
+            if (Math.abs(res) > 1e9 || (Math.abs(res) < 1e-4 && res !== 0)) {
+              display = res.toExponential(4);
+            } else {
+              display = parseFloat(res.toPrecision(10));
+            }
+          }
+          this.log(raw, display, 'out');
+        } catch (e) {
+          this.log(raw, "Syntax Error", 'err');
+        } finally {
+          this.dom.input.value = '';
+          this.state.cursor = 0;
+        }
+      }
+
+      log(inTxt, outTxt, type) {
+        const el = document.createElement('div');
+        el.className = 'log-entry';
+
+        if (inTxt) {
+          const i = document.createElement('div');
+          i.className = 'log-in';
+          i.textContent = inTxt;
+          el.appendChild(i);
+        }
+
+        const o = document.createElement('div');
+        if (type === 'out') {
+          o.className = 'log-out';
+          o.textContent = `= ${outTxt}`;
+          o.onclick = () => this.insert(String(outTxt));
+        } else if (type === 'err') {
+          o.className = 'log-err'; o.textContent = outTxt;
+        } else {
+          o.className = 'log-sys'; o.textContent = outTxt;
+        }
+        el.appendChild(o);
+        this.dom.terminal.appendChild(el);
+        this.dom.terminal.scrollTop = this.dom.terminal.scrollHeight;
+      }
+
+      toggleMode() {
+        this.state.mode = this.state.mode === 'DEG' ? 'RAD' : 'DEG';
+        this.dom.badge.textContent = this.state.mode;
+        this.log(null, `Mode set to ${this.state.mode}`, 'sys');
+      }
+
+      clear() {
+        this.dom.terminal.innerHTML = '';
+        this.state.cursor = 0;
+      }
+
+      init() {
+        const field = this.dom.input;
+        field.addEventListener('keyup', () => this.updateCursor());
+        field.addEventListener('click', () => this.updateCursor());
+        field.addEventListener('touchend', () => this.updateCursor());
+        field.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') this.process();
+        });
+
+        const preventZones = document.querySelectorAll('.prevent-focus-zone button');
+        preventZones.forEach(btn => {
+          btn.addEventListener('mousedown', (e) => e.preventDefault());
+        });
+
+        this.log(null, "AetherCalculus Online.", 'sys');
+      }
+    }
+
+    const engine = new Engine();
+  </script>
+</body>
+</html>

@@ -12,6 +12,31 @@
     ]
   },
   {
+    "id": "calculus",
+    "title": "AetherCalculus",
+    "path": "./fragments/AetherCalculus.html",
+    "description": "Scientific engineering console. Supports suffix notation (k, M, G), integration, and differentiation.",
+    "color": "#9580FF",
+    "tags": [
+      "Math",
+      "Engineering",
+      "Tool",
+      "Calculator"
+    ]
+  },
+  {
+    "id": "markdown",
+    "title": "AetherMarkdown",
+    "path": "./fragments/AetherMarkdown.html",
+    "description": "A feature-rich Markdown to PDF utility with Syntax highlighted Codeblock.",
+    "color": "#FF9CE6",
+    "tags": [
+      "Markdown",
+      "Utility",
+      "Mobile"
+    ]
+  },
+  {
     "id": "tetris",
     "title": "TetraFlux",
     "path": "./fragments/TetraFlux.html",
@@ -20,18 +45,6 @@
     "tags": [
       "Game",
       "Arcade",
-      "Mobile"
-    ]
-  },
-  {
-    "id": "markdown",
-    "title": "AetherMarkdown",
-    "path": "./fragments/AetherMarkdown.html",
-    "description": "A feature-rich Markdown to PDF utlity with Syntax highlighted Codeblock.",
-    "color": "#FF9CE6",
-    "tags": [
-      "Markdown",
-      "Utility",
       "Mobile"
     ]
   }
