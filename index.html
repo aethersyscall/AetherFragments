@@ -12,36 +12,65 @@
     rel="stylesheet">
 
   <style>
+    /* 
+     * AETHER AMETHYST DESIGN TOKENS 
+     */
     :root {
-      /* CATPPUCCIN MOCHA PALETTE */
-      --rosewater: #f5e0dc;
-      --flamingo: #f2cdcd;
-      --pink: #f5c2e7;
-      --mauve: #cba6f7;
-      --red: #f38ba8;
-      --maroon: #eba0ac;
-      --peach: #fab387;
-      --yellow: #f9e2af;
-      --green: #a6e3a1;
-      --teal: #94e2d5;
-      --sky: #89dceb;
-      --sapphire: #74c7ec;
-      --blue: #89b4fa;
-      --lavender: #b4befe;
+      --font-display: 'Outfit', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-      --text: #cdd6f4;
-      --subtext1: #bac2de;
-      --subtext0: #a6adc8;
-      --overlay2: #9399b2;
-      --overlay1: #7f849c;
-      --overlay0: #6c7086;
+    /* VARIANT: ECLIPSE (Default) */
+    [data-theme="eclipse"] {
+      --bg-deep: #13111B;
+      --bg-surface: #1B1824;
+      --bg-input: #1B1824;
+      --bg-element: #252130;
+      
+      --border: #2E283B;
+      
+      --fg-primary: #EDE8F5;
+      --fg-secondary: #9B94A8;
+      --fg-muted: #5C5269;
 
-      --base: #1e1e2e;
-      --mantle: #181825;
-      --crust: #11111b;
-      --surface0: #313244;
-      --surface1: #45475a;
-      --surface2: #585b70;
+      /* The Spectrum */
+      --accent-keyword: #9580FF; /* Logic (Purple) */
+      --accent-function: #FF70B8; /* Action (Pink) */
+      --accent-string: #FF9CE6;   /* Data (Rose) */
+      --accent-flow: #80FFEA;     /* Flow (Cyan) */
+      
+      --status-error: #FF70B8;    /* Pink for Error */
+      --status-warning: #E0AF68;  /* Gold for Warning */
+      
+      --shadow: rgba(0, 0, 0, 0.6);
+      --glow: rgba(189, 94, 255, 0.2);
+    }
+
+    /* VARIANT: BLISS */
+    [data-theme="bliss"] {
+      --bg-deep: #FDF7FF;
+      --bg-surface: #F4EBFA;
+      --bg-input: #FFFFFF;
+      --bg-element: #EADCF5;
+      
+      --border: #DCC2F0;
+      
+      --fg-primary: #3E3245;
+      --fg-secondary: #746880;
+      --fg-muted: #9E94A8;
+
+      /* The Spectrum */
+      --accent-keyword: #624CAB;
+      --accent-function: #D1006B;
+      --accent-string: #C22085;
+      --accent-flow: #008B8B;
+      
+      --status-error: #D1006B;
+      --status-warning: #F5A623;
+      
+      --shadow: rgba(62, 50, 69, 0.1);
+      --glow: rgba(136, 57, 206, 0.15);
     }
 
     * {
@@ -51,13 +80,14 @@
     }
 
     body {
-      background-color: var(--base);
-      color: var(--text);
-      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--fg-primary);
+      font-family: var(--font-display);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
+      transition: background-color 0.5s var(--ease-smooth), color 0.5s;
     }
 
     /* --- Hero Section --- */
@@ -75,25 +105,69 @@
       width: 120px;
       height: 120px;
       border-radius: 50%;
-      border: 4px solid var(--mauve);
+      border: 4px solid var(--bg-deep);
       margin-bottom: 1.5rem;
-      box-shadow: 0 0 20px rgba(203, 166, 247, 0.3);
+      box-shadow: 
+        0 0 0 3px var(--accent-keyword),
+        0 0 30px var(--glow);
       object-fit: cover;
+      transition: all 0.5s var(--ease-smooth);
+    }
+
+    .avatar:hover {
+        transform: scale(1.05) rotate(5deg);
+        box-shadow: 
+        0 0 0 3px var(--accent-function),
+        0 0 50px var(--glow);
     }
 
     h1 {
       font-size: 2.5rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
-      background: linear-gradient(45deg, var(--mauve), var(--blue));
+      background: linear-gradient(135deg, var(--accent-keyword), var(--accent-function));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .subtitle {
-      color: var(--subtext0);
+      color: var(--fg-secondary);
       font-size: 1.1rem;
       margin-bottom: 1.5rem;
+    }
+
+    /* --- Theme Toggle --- */
+    .toggle-capsule {
+        background: var(--bg-surface);
+        padding: 4px;
+        border-radius: 99px;
+        display: inline-flex;
+        gap: 4px;
+        border: 1px solid var(--border);
+        margin-bottom: 1.5rem;
+    }
+
+    .toggle-btn {
+        border: none;
+        background: transparent;
+        color: var(--fg-secondary);
+        padding: 6px 16px;
+        border-radius: 99px;
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s var(--ease-smooth);
+    }
+
+    .toggle-btn:hover {
+        color: var(--fg-primary);
+    }
+
+    .toggle-btn.active {
+        background: var(--bg-element);
+        color: var(--accent-keyword);
+        box-shadow: 0 2px 10px var(--glow);
     }
 
     /* --- GitHub Button --- */
@@ -101,29 +175,31 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      background-color: var(--surface0);
-      color: var(--text);
+      background-color: var(--bg-element);
+      color: var(--fg-primary);
       padding: 10px 20px;
       border-radius: 30px;
       text-decoration: none;
       font-weight: 600;
-      border: 1px solid var(--surface1);
+      border: 1px solid var(--border);
       transition: all 0.3s ease;
       font-size: 0.9rem;
     }
 
     .btn-github:hover {
-      background-color: var(--surface1);
-      border-color: var(--mauve);
+      background-color: var(--bg-surface);
+      border-color: var(--accent-function);
+      color: var(--accent-function);
       transform: translateY(-2px);
+      box-shadow: 0 5px 15px var(--glow);
     }
 
     /* --- Warning Callout --- */
     .warning-box {
       margin-top: 2rem;
-      background-color: rgba(243, 139, 168, 0.1);
-      /* Red alpha */
-      border: 1px solid var(--red);
+      /* Using Pink (Function/Error) for alerts in Aether */
+      background-color: var(--bg-surface);
+      border: 1px solid var(--status-error);
       padding: 1rem 1.5rem;
       border-radius: 12px;
       max-width: 600px;
@@ -132,22 +208,23 @@
       align-items: flex-start;
       gap: 15px;
       text-align: left;
+      box-shadow: 0 4px 20px var(--shadow);
     }
 
     .warning-icon {
-      color: var(--red);
+      color: var(--status-error);
       flex-shrink: 0;
       margin-top: 2px;
     }
 
     .warning-content {
       font-size: 0.9rem;
-      color: var(--subtext0);
+      color: var(--fg-secondary);
       line-height: 1.5;
     }
 
     .warning-content strong {
-      color: var(--red);
+      color: var(--status-error);
       display: block;
       margin-bottom: 4px;
     }
@@ -163,18 +240,19 @@
     .search-input {
       width: 100%;
       padding: 15px 20px 15px 50px;
-      background-color: var(--mantle);
-      border: 2px solid var(--surface0);
+      background-color: var(--bg-input);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      color: var(--text);
+      color: var(--fg-primary);
       font-size: 1rem;
       font-family: 'Outfit', sans-serif;
       outline: none;
-      transition: border-color 0.3s ease;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .search-input:focus {
-      border-color: var(--blue);
+      border-color: var(--accent-keyword);
+      box-shadow: 0 0 15px var(--glow);
     }
 
     .search-icon {
@@ -182,7 +260,7 @@
       left: 15px;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--overlay0);
+      color: var(--fg-muted);
       pointer-events: none;
     }
 
@@ -199,8 +277,8 @@
     }
 
     .card {
-      background-color: var(--mantle);
-      border: 1px solid var(--surface0);
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
       border-radius: 16px;
       padding: 1.5rem;
       text-decoration: none;
@@ -213,8 +291,8 @@
 
     .card:hover {
       transform: translateY(-5px);
-      border-color: var(--mauve);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border-color: var(--accent-function);
+      box-shadow: 0 10px 30px var(--shadow);
     }
 
     .card-top {
@@ -227,11 +305,11 @@
     .card-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: var(--text);
+      color: var(--fg-primary);
     }
 
     .card-desc {
-      color: var(--subtext0);
+      color: var(--fg-secondary);
       font-size: 0.95rem;
       line-height: 1.6;
       margin-bottom: 1.5rem;
@@ -247,8 +325,8 @@
     .tag {
       font-size: 0.75rem;
       padding: 4px 10px;
-      background-color: var(--surface0);
-      color: var(--subtext1);
+      background-color: var(--bg-element);
+      color: var(--accent-keyword);
       border-radius: 6px;
       font-family: 'JetBrains Mono', monospace;
     }
@@ -256,7 +334,7 @@
     .empty-state {
       grid-column: 1 / -1;
       text-align: center;
-      color: var(--overlay0);
+      color: var(--fg-muted);
       padding: 3rem;
       display: none;
     }
@@ -265,26 +343,32 @@
     footer {
       margin-top: auto;
       padding: 2rem;
-      color: var(--overlay0);
+      color: var(--fg-muted);
       font-size: 0.85rem;
       text-align: center;
-      border-top: 1px solid var(--surface0);
+      border-top: 1px solid var(--border);
       width: 100%;
     }
 
     footer span {
-      color: var(--mauve);
+      color: var(--accent-keyword);
     }
   </style>
 </head>
 
-<body>
+<body data-theme="eclipse">
 
   <!-- HERO -->
   <div class="hero">
     <img src="https://avatars.githubusercontent.com/u/251496121?v=4" alt="AetherSyscall" class="avatar">
     <h1>AetherSyscall</h1>
     <div class="subtitle">Fragments // Experimental Library</div>
+
+    <!-- THEME TOGGLE -->
+    <div class="toggle-capsule">
+        <button class="toggle-btn active" onclick="setTheme('eclipse')">Eclipse</button>
+        <button class="toggle-btn" onclick="setTheme('bliss')">Bliss</button>
+    </div>
 
     <!-- GITHUB LINK -->
     <a href="https://github.com/AetherSyscall" target="_blank" class="btn-github">
@@ -333,11 +417,26 @@
 
   <!-- FOOTER -->
   <footer>
-    &copy; AetherSyscall. Theme: Catppuccin Mocha.
+    &copy; AetherSyscall. Theme: <span>AetherAmethyst</span>.
   </footer>
 
   <script>
     let allFragments = [];
+
+    // --- THEME TOGGLE LOGIC ---
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        
+        // Update button states
+        const btns = document.querySelectorAll('.toggle-btn');
+        btns.forEach(btn => {
+            if(btn.innerText.toLowerCase() === theme) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
 
     async function init() {
       const grid = document.getElementById('grid');
@@ -366,7 +465,7 @@
 
       } catch (err) {
         console.error(err);
-        grid.innerHTML = '<div style="color:var(--red); text-align:center; grid-column: 1/-1;">Error accessing fragment memory.</div>';
+        grid.innerHTML = '<div style="color:var(--status-error); text-align:center; grid-column: 1/-1;">Error accessing fragment memory.</div>';
       }
     }
 
@@ -391,16 +490,21 @@
         card.href = item.path;
         card.className = 'card';
 
-        // Mouse enter/leave for dynamic border color based on JSON color
-        card.addEventListener('mouseenter', () => card.style.borderColor = item.color || 'var(--mauve)');
-        card.addEventListener('mouseleave', () => card.style.borderColor = 'var(--surface0)');
+        // Use Aether colors instead of passing arbitrary JSON colors, 
+        // OR allow JSON colors but ensure they don't break the theme.
+        // For Aether consistency, we default to the theme function color (Pink).
+        const iconColor = item.color || 'var(--accent-function)';
+
+        // Mouse enter/leave logic
+        card.addEventListener('mouseenter', () => card.style.borderColor = iconColor);
+        card.addEventListener('mouseleave', () => card.style.borderColor = 'var(--border)');
 
         const tagsHtml = item.tags.map(t => `<span class="tag">${t}</span>`).join('');
 
         card.innerHTML = `
                     <div class="card-top">
                         <span class="card-title">${item.title}</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${item.color || 'var(--text)'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                     </div>
                     <p class="card-desc">${item.description}</p>
                     <div class="card-tags">
