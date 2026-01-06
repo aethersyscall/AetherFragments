@@ -22,5 +22,17 @@
       "Arcade",
       "Mobile"
     ]
+  },
+  {
+    "id": "markdown",
+    "title": "AetherMarkdown",
+    "path": "./fragments/AetherMarkdown.html",
+    "description": "A feature-rich Markdown to PDF utlity with Syntax highlighted Codeblock.",
+    "color": "#FF9CE6",
+    "tags": [
+      "Markdown",
+      "Utility",
+      "Mobile"
+    ]
   }
 ]
