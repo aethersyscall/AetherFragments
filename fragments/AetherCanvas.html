@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherCanvas // Brainstorming Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            /* AETHER AMETHYST: ECLIPSE PALETTE */
+            --bg-deep: #13111B;
+            --bg-surface: #1B1824;
+            --bg-element: #252130;
+            --bg-active: #2F2942;
+            --fg-primary: #EDE8F5;
+            --fg-secondary: #9B94A8;
+            --accent-purple: #9580FF;
+            --accent-pink: #FF70B8;
+            --accent-cyan: #80FFEA;
+            --border: #2E283B;
+            --radius: 12px;
+            --shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: var(--bg-deep); 
+            color: var(--fg-primary); 
+            font-family: 'Outfit', sans-serif; 
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- UI OVERLAYS --- */
+        .toolbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            padding: 8px;
+            border-radius: 16px;
+            display: flex;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            z-index: 100;
+        }
+
+        .tool-group {
+            display: flex;
+            gap: 4px;
+            padding-right: 8px;
+            border-right: 1px solid var(--border);
+        }
+
+        .tool-btn {
+            width: 42px;
+            height: 42px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            color: var(--fg-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover { background: var(--bg-element); color: var(--fg-primary); }
+        .tool-btn.active { background: var(--bg-active); color: var(--accent-purple); box-shadow: 0 0 15px rgba(149,128,255,0.2); }
+
+        .sidebar {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: var(--shadow);
+            z-index: 100;
+        }
+
+        .swatch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .swatch { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .swatch.active { border-color: var(--fg-primary); transform: scale(1.1); }
+
+        .actions {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .action-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            color: var(--fg-primary);
+            padding: 10px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .action-btn:hover { border-color: var(--accent-cyan); }
+
+        canvas { cursor: crosshair; touch-action: none; }
+        
+        .status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--bg-surface);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--fg-secondary);
+            border: 1px solid var(--border);
+        }
+
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <div class="tool-group">
+            <button class="tool-btn active" data-tool="pencil" title="Pencil (P)"><i class="ph ph-pencil-line"></i></button>
+            <button class="tool-btn" data-tool="line" title="Line (L)"><i class="ph ph-line-segment"></i></button>
+            <button class="tool-btn" data-tool="rect" title="Rectangle (R)"><i class="ph ph-rectangle"></i></button>
+            <button class="tool-btn" data-tool="circle" title="Circle (C)"><i class="ph ph-circle"></i></button>
+            <button class="tool-btn" data-tool="text" title="Text (T)"><i class="ph ph-text-t"></i></button>
+        </div>
+        <div class="tool-group">
+            <button class="tool-btn" onclick="CanvasCore.undo()" title="Undo (Ctrl+Z)"><i class="ph ph-arrow-u-up-left"></i></button>
+            <button class="tool-btn" onclick="CanvasCore.redo()" title="Redo (Ctrl+Y)"><i class="ph ph-arrow-u-up-right"></i></button>
+        </div>
+        <button class="tool-btn" data-tool="eraser" title="Eraser (E)"><i class="ph ph-eraser"></i></button>
+        <button class="tool-btn" data-tool="pan" title="Pan (Hold Space)"><i class="ph ph-hand-grabbing"></i></button>
+    </div>
+
+    <div class="sidebar">
+        <div class="swatch-grid">
+            <div class="swatch active" style="background: #EDE8F5;" data-color="#EDE8F5"></div>
+            <div class="swatch" style="background: #9580FF;" data-color="#9580FF"></div>
+            <div class="swatch" style="background: #FF70B8;" data-color="#FF70B8"></div>
+            <div class="swatch" style="background: #80FFEA;" data-color="#80FFEA"></div>
+            <div class="swatch" style="background: #C26BFF;" data-color="#C26BFF"></div>
+            <div class="swatch" style="background: #FF9CE6;" data-color="#FF9CE6"></div>
+        </div>
+        <div style="width: 2px; height: 30px; background: var(--border); margin: 0 auto;"></div>
+        <input type="range" id="sizeRange" min="2" max="20" value="4" style="writing-mode: bt-lr; width: 60px;">
+    </div>
+
+    <div class="actions">
+        <button class="action-btn" onclick="CanvasCore.clear()"><i class="ph ph-trash"></i> Clear</button>
+        <button class="action-btn" onclick="CanvasCore.exportJSON()"><i class="ph ph-file-js"></i> Save State</button>
+        <button class="action-btn" onclick="document.getElementById('importFile').click()"><i class="ph ph-upload"></i> Import</button>
+        <button class="action-btn" style="background: var(--accent-purple); color: var(--bg-deep)" onclick="CanvasCore.exportPNG()"><i class="ph ph-image"></i> Export PNG</button>
+    </div>
+
+    <input type="file" id="importFile" accept=".json" onchange="CanvasCore.importJSON(event)">
+
+    <div class="status" id="statusBar">Pos: 0, 0 | Entities: 0</div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const CanvasCore = {
+            canvas: document.getElementById('canvas'),
+            ctx: null,
+            entities: [],
+            currentEntity: null,
+            
+            // Undo/Redo Stacks
+            history: [[]],
+            historyIndex: 0,
+
+            tool: 'pencil',
+            color: '#EDE8F5',
+            size: 4,
+            pan: { x: 0, y: 0 },
+            isDrawing: false,
+            isPanning: false,
+            lastMouse: { x: 0, y: 0 },
+
+            init() {
+                this.ctx = this.canvas.getContext('2d');
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                
+                this.canvas.addEventListener('mousedown', (e) => this.start(e));
+                this.canvas.addEventListener('mousemove', (e) => this.move(e));
+                this.canvas.addEventListener('mouseup', () => this.end());
+                
+                document.querySelectorAll('.tool-btn').forEach(btn => {
+                    if (btn.dataset.tool) {
+                        btn.onclick = () => {
+                            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            this.tool = btn.dataset.tool;
+                        };
+                    }
+                });
+
+                document.querySelectorAll('.swatch').forEach(sw => {
+                    sw.onclick = () => {
+                        document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+                        sw.classList.add('active');
+                        this.color = sw.dataset.color;
+                    };
+                });
+
+                this.draw();
+            },
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.draw();
+            },
+
+            getCoords(e) {
+                return {
+                    x: e.clientX - this.pan.x,
+                    y: e.clientY - this.pan.y
+                };
+            },
+
+            // --- History Logic ---
+            saveHistory() {
+                // If we perform a new action after undoing, prune the "future"
+                if (this.historyIndex < this.history.length - 1) {
+                    this.history = this.history.slice(0, this.historyIndex + 1);
+                }
+                
+                // Deep copy entities and push to stack
+                this.history.push(JSON.parse(JSON.stringify(this.entities)));
+                this.historyIndex++;
+
+                // Optional: Limit history size to 50 for performance
+                if (this.history.length > 50) {
+                    this.history.shift();
+                    this.historyIndex--;
+                }
+            },
+
+            undo() {
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    this.entities = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+                    this.updateStatus();
+                    this.draw();
+                }
+            },
+
+            redo() {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.historyIndex++;
+                    this.entities = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+                    this.updateStatus();
+                    this.draw();
+                }
+            },
+
+            start(e) {
+                if (this.tool === 'pan' || e.button === 1) {
+                    this.isPanning = true;
+                    this.lastMouse = { x: e.clientX, y: e.clientY };
+                    return;
+                }
+
+                this.isDrawing = true;
+                const coords = this.getCoords(e);
+                
+                this.currentEntity = {
+                    type: this.tool,
+                    color: this.color,
+                    size: document.getElementById('sizeRange').value,
+                    points: [coords],
+                    startX: coords.x,
+                    startY: coords.y,
+                    endX: coords.x,
+                    endY: coords.y,
+                    text: ""
+                };
+
+                if (this.tool === 'text') {
+                    const txt = prompt("Enter Note:");
+                    if (txt) {
+                        this.currentEntity.text = txt;
+                        this.entities.push(this.currentEntity);
+                        this.saveHistory();
+                    }
+                    this.isDrawing = false;
+                }
+            },
+
+            move(e) {
+                if (this.isPanning) {
+                    const dx = e.clientX - this.lastMouse.x;
+                    const dy = e.clientY - this.lastMouse.y;
+                    this.pan.x += dx;
+                    this.pan.y += dy;
+                    this.lastMouse = { x: e.clientX, y: e.clientY };
+                    this.updateStatus();
+                    this.draw();
+                    return;
+                }
+
+                if (!this.isDrawing) return;
+                const coords = this.getCoords(e);
+
+                if (this.tool === 'pencil' || this.tool === 'eraser') {
+                    if (this.tool === 'eraser') this.currentEntity.color = '#13111B';
+                    this.currentEntity.points.push(coords);
+                } else {
+                    this.currentEntity.endX = coords.x;
+                    this.currentEntity.endY = coords.y;
+                }
+                this.draw();
+            },
+
+            end() {
+                if (this.isDrawing && this.tool !== 'text') {
+                    this.entities.push(this.currentEntity);
+                    this.saveHistory(); // Save snapshot after entity completion
+                }
+                this.isDrawing = false;
+                this.isPanning = false;
+                this.currentEntity = null;
+                this.updateStatus();
+                this.draw();
+            },
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.save();
+                this.ctx.translate(this.pan.x, this.pan.y);
+
+                this.drawGrid();
+
+                const renderQueue = [...this.entities];
+                if (this.currentEntity) renderQueue.push(this.currentEntity);
+
+                renderQueue.forEach(ent => this.drawEntity(ent));
+
+                this.ctx.restore();
+            },
+
+            drawGrid() {
+                this.ctx.strokeStyle = '#1B1824';
+                this.ctx.lineWidth = 1;
+                const step = 50;
+                const startX = -this.pan.x - ((-this.pan.x) % step);
+                const startY = -this.pan.y - ((-this.pan.y) % step);
+
+                for (let x = startX; x < startX + this.canvas.width + step; x += step) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, -this.pan.y);
+                    this.ctx.lineTo(x, -this.pan.y + this.canvas.height);
+                    this.ctx.stroke();
+                }
+                for (let y = startY; y < startY + this.canvas.height + step; y += step) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-this.pan.x, y);
+                    this.ctx.lineTo(-this.pan.x + this.canvas.width, y);
+                    this.ctx.stroke();
+                }
+            },
+
+            drawEntity(ent) {
+                this.ctx.strokeStyle = ent.color;
+                this.ctx.fillStyle = ent.color;
+                this.ctx.lineWidth = ent.size;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+
+                switch (ent.type) {
+                    case 'pencil':
+                    case 'eraser':
+                        if (ent.points.length < 2) return;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(ent.points[0].x, ent.points[0].y);
+                        for (let p of ent.points) this.ctx.lineTo(p.x, p.y);
+                        this.ctx.stroke();
+                        break;
+                    case 'line':
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(ent.startX, ent.startY);
+                        this.ctx.lineTo(ent.endX, ent.endY);
+                        this.ctx.stroke();
+                        break;
+                    case 'rect':
+                        this.ctx.strokeRect(ent.startX, ent.startY, ent.endX - ent.startX, ent.endY - ent.startY);
+                        break;
+                    case 'circle':
+                        const r = Math.sqrt(Math.pow(ent.endX - ent.startX, 2) + Math.pow(ent.endY - ent.startY, 2));
+                        this.ctx.beginPath();
+                        this.ctx.arc(ent.startX, ent.startY, r, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                        break;
+                    case 'text':
+                        this.ctx.font = `bold ${ent.size * 5}px Outfit`;
+                        this.ctx.fillText(ent.text, ent.startX, ent.startY);
+                        break;
+                }
+            },
+
+            updateStatus() {
+                document.getElementById('statusBar').innerText = `Pos: ${Math.round(this.pan.x)}, ${Math.round(this.pan.y)} | Entities: ${this.entities.length}`;
+            },
+
+            clear() {
+                if(confirm("Wipe the canvas?")) {
+                    this.entities = [];
+                    this.saveHistory();
+                    this.draw();
+                }
+            },
+
+            exportPNG() {
+                const link = document.createElement('a');
+                link.download = `AetherCanvas_${Date.now()}.png`;
+                link.href = this.canvas.toDataURL();
+                link.click();
+            },
+
+            exportJSON() {
+                const data = JSON.stringify(this.entities);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = `AetherCanvas_State_${Date.now()}.json`;
+                link.href = url;
+                link.click();
+            },
+
+            importJSON(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        this.entities = JSON.parse(event.target.result);
+                        this.history = [JSON.parse(JSON.stringify(this.entities))];
+                        this.historyIndex = 0;
+                        this.draw();
+                    } catch (err) { alert("Invalid JSON State File"); }
+                };
+                reader.readAsText(file);
+            }
+        };
+
+        window.onload = () => CanvasCore.init();
+
+        // Keyboard Shortcuts
+        window.addEventListener('keydown', (e) => {
+            const k = e.key.toLowerCase();
+            
+            // Undo/Redo Shortcuts
+            if (e.ctrlKey || e.metaKey) {
+                if (k === 'z') {
+                    e.preventDefault();
+                    CanvasCore.undo();
+                }
+                if (k === 'y') {
+                    e.preventDefault();
+                    CanvasCore.redo();
+                }
+                return;
+            }
+
+            if (k === 'p') document.querySelector('[data-tool="pencil"]').click();
+            if (k === 'l') document.querySelector('[data-tool="line"]').click();
+            if (k === 'r') document.querySelector('[data-tool="rect"]').click();
+            if (k === 'c') document.querySelector('[data-tool="circle"]').click();
+            if (k === 't') document.querySelector('[data-tool="text"]').click();
+            if (k === 'e') document.querySelector('[data-tool="eraser"]').click();
+        });
+    </script>
+</body>
+</html>

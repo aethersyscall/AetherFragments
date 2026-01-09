@@ -25,6 +25,19 @@
     ]
   },
   {
+    "id": "canvas",
+    "title": "AetherCanvas",
+    "path": "./fragments/AetherCanvas.html",
+    "description": "An infinite-canvas brainstorming workstation featuring vector-based drawing, state serialization (JSON), and high-resolution exports.",
+    "color": "#9580FF",
+    "tags": [
+      "Design",
+      "Creative",
+      "Brainstorming",
+      "Tool"
+    ]
+  },
+  {
     "id": "markdown",
     "title": "AetherMarkdown",
     "path": "./fragments/AetherMarkdown.html",
