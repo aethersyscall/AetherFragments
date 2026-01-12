@@ -23,3 +23,4 @@ If you find a tool useful (e.g., **PomoAether**), it is highly recommended to:
      "color": "#HEXCODE"
    }
 
+> Enjoy and Explore whats useful to you!
