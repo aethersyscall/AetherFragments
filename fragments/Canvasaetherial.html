@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Canvasaetherial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap"
+    rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      /* AETHER AMETHYST: ECLIPSE */
+      --bg: #13111B;
+      --glass: rgba(27, 24, 36, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --fg: #EDE8F5;
+      --fg-dim: #9B94A8;
+
+      --acc-p: #9580FF;
+      /* Purple */
+      --acc-k: #FF70B8;
+      /* Pink */
+      --acc-c: #80FFEA;
+      /* Cyan */
+
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      --blur: blur(16px);
+      --ease: cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      touch-action: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Outfit', sans-serif;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* --- LAYOUT --- */
+    .ui-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+      z-index: 10;
+    }
+
+    .pointer-events-auto {
+      pointer-events: auto;
+    }
+
+    /* --- HEADER --- */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .brand {
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.5px;
+      text-shadow: 0 0 20px rgba(149, 128, 255, 0.3);
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      padding: 8px 16px;
+      border-radius: 99px;
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand span {
+      color: var(--acc-p);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow);
+    }
+
+    /* --- BOTTOM DOCK --- */
+    .bottom-dock {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .prop-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      padding: 8px 16px;
+      border-radius: 99px;
+      border: 1px solid var(--glass-border);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s var(--ease);
+      pointer-events: none;
+    }
+
+    .prop-bar.visible {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .tools {
+      display: flex;
+      gap: 4px;
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      padding: 6px;
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow);
+    }
+
+    /* --- COMPONENTS --- */
+    .btn {
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: transparent;
+      color: var(--fg-dim);
+      border-radius: 14px;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--ease);
+      position: relative;
+    }
+
+    .btn:active {
+      transform: scale(0.9);
+    }
+
+    .btn:hover {
+      color: var(--fg);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn.active {
+      color: var(--bg);
+      background: var(--acc-p);
+      box-shadow: 0 0 15px rgba(149, 128, 255, 0.4);
+    }
+
+    .btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      width: 4px;
+      height: 4px;
+      background: var(--acc-p);
+      border-radius: 50%;
+    }
+
+    .btn-sm {
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+    }
+
+    .swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s;
+    }
+
+    .swatch.active {
+      border-color: var(--fg);
+      transform: scale(1.2);
+    }
+
+    .divider {
+      width: 1px;
+      height: 24px;
+      background: var(--glass-border);
+      margin: 0 4px;
+    }
+
+    /* CANVAS */
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    .status-pill {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--fg-dim);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      text-shadow: 0 1px 2px black;
+    }
+
+    .status-pill.show {
+      opacity: 0.8;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    input[type="range"] {
+      accent-color: var(--acc-p);
+      cursor: pointer;
+    }
+
+    @media (min-width: 768px) {
+      .ui-layer {
+        padding: 24px;
+      }
+
+      .tools {
+        gap: 8px;
+        padding: 8px;
+      }
+
+      .btn {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="ui-layer">
+    <!-- Top Header -->
+    <div class="top-bar">
+      <div class="brand pointer-events-auto">
+        <i class="ph-fill ph-asterisk-simple" style="color:var(--acc-k)"></i>
+        Canvas<span>aetherial</span>
+      </div>
+
+      <div class="actions pointer-events-auto">
+        <button class="btn btn-sm" onclick="App.undo()" title="Undo"><i class="ph ph-arrow-u-up-left"></i></button>
+        <button class="btn btn-sm" onclick="App.redo()" title="Redo"><i class="ph ph-arrow-u-up-right"></i></button>
+        <div class="divider"></div>
+        <button class="btn btn-sm" onclick="App.clear()" title="Clear"><i class="ph ph-trash"></i></button>
+        <button class="btn btn-sm" onclick="App.io.save()" title="Save JSON"><i class="ph ph-floppy-disk"></i></button>
+        <button class="btn btn-sm" onclick="document.getElementById('fileIn').click()" title="Load JSON"><i
+            class="ph ph-folder-open"></i></button>
+        <button class="btn btn-sm" onclick="App.io.export()" title="Export PNG" style="color:var(--acc-c)"><i
+            class="ph ph-image"></i></button>
+      </div>
+    </div>
+
+    <!-- Notification Pill -->
+    <div id="status" class="status-pill">Zoom: 100%</div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-dock">
+      <!-- Properties (Collapsible) -->
+      <div id="props" class="prop-bar pointer-events-auto">
+        <div class="swatch active" style="background:#EDE8F5" onclick="App.setColor('#EDE8F5', this)"></div>
+        <div class="swatch" style="background:#9580FF" onclick="App.setColor('#9580FF', this)"></div>
+        <div class="swatch" style="background:#FF70B8" onclick="App.setColor('#FF70B8', this)"></div>
+        <div class="swatch" style="background:#80FFEA" onclick="App.setColor('#80FFEA', this)"></div>
+        <div class="swatch" style="background:#C26BFF" onclick="App.setColor('#C26BFF', this)"></div>
+
+        <div class="divider"></div>
+        <i class="ph ph-circle" style="font-size:0.8rem; color:var(--fg-dim)"></i>
+        <input type="range" min="2" max="30" value="4" oninput="App.setSize(this.value)">
+      </div>
+
+      <!-- Main Tools -->
+      <div class="tools pointer-events-auto">
+        <button class="btn active" data-tool="pencil" onclick="App.setTool('pencil', this)"><i
+            class="ph ph-pencil-simple"></i></button>
+        <button class="btn" data-tool="line" onclick="App.setTool('line', this)"><i
+            class="ph ph-line-segment"></i></button>
+        <button class="btn" data-tool="rect" onclick="App.setTool('rect', this)"><i
+            class="ph ph-rectangle"></i></button>
+        <button class="btn" data-tool="circle" onclick="App.setTool('circle', this)"><i
+            class="ph ph-circle"></i></button>
+        <button class="btn" data-tool="text" onclick="App.setTool('text', this)"><i class="ph ph-text-t"></i></button>
+        <div class="divider"></div>
+        <button class="btn" data-tool="eraser" onclick="App.setTool('eraser', this)"><i
+            class="ph ph-eraser"></i></button>
+        <button class="btn" data-tool="pan" onclick="App.setTool('pan', this)"><i
+            class="ph ph-hand-grabbing"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="fileIn" accept=".json" onchange="App.io.load(event)">
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * CANVAS AETHERIAL ENGINE
+     * Staff-Level Architecture with Matrix Transforms
+     */
+    const App = {
+      canvas: document.getElementById('c'),
+      ctx: null,
+
+      // State
+      entities: [],
+      history: [],
+      histIdx: -1,
+
+      // Viewport (Camera)
+      camera: {x: 0, y: 0, z: 1},
+
+      // Interaction
+      tool: 'pencil',
+      color: '#EDE8F5',
+      size: 4,
+      isDrawing: false,
+      isPanning: false,
+      lastPos: {x: 0, y: 0},
+      currentEntity: null,
+
+      // Touch Cache
+      touchDist: 0,
+
+      init() {
+        this.ctx = this.canvas.getContext('2d', {alpha: false});
+        this.resize();
+
+        // Event Listeners (Passive for perf)
+        window.addEventListener('resize', () => this.resize());
+
+        const c = this.canvas;
+        // Mouse
+        c.addEventListener('mousedown', e => this.onStart(e));
+        window.addEventListener('mousemove', e => this.onMove(e));
+        window.addEventListener('mouseup', e => this.onEnd(e));
+        c.addEventListener('wheel', e => this.onWheel(e), {passive: false});
+
+        // Touch
+        c.addEventListener('touchstart', e => this.onTouchStart(e), {passive: false});
+        c.addEventListener('touchmove', e => this.onTouchMove(e), {passive: false});
+        c.addEventListener('touchend', e => this.onEnd(e));
+
+        // Keyboard
+        window.addEventListener('keydown', e => this.onKey(e));
+
+        // Init History
+        this.saveState();
+        this.loop();
+
+        // Show props initially
+        document.getElementById('props').classList.add('visible');
+      },
+
+      resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.render();
+      },
+
+      // --- TRANSFORM MATH ---
+      toWorld(x, y) {
+        return {
+          x: (x - this.camera.x) / this.camera.z,
+          y: (y - this.camera.y) / this.camera.z
+        };
+      },
+
+      // --- INPUT HANDLERS ---
+      onStart(e) {
+        if (e.button === 1 || this.tool === 'pan' || e.shiftKey) {
+          this.isPanning = true;
+          this.lastPos = {x: e.clientX, y: e.clientY};
+          this.canvas.style.cursor = 'grabbing';
+          return;
+        }
+
+        this.isDrawing = true;
+        const p = this.toWorld(e.clientX, e.clientY);
+        this.beginEntity(p);
+      },
+
+      onMove(e) {
+        if (this.isPanning) {
+          const dx = e.clientX - this.lastPos.x;
+          const dy = e.clientY - this.lastPos.y;
+          this.camera.x += dx;
+          this.camera.y += dy;
+          this.lastPos = {x: e.clientX, y: e.clientY};
+          return;
+        }
+
+        if (this.isDrawing && this.currentEntity) {
+          const p = this.toWorld(e.clientX, e.clientY);
+          this.updateEntity(p);
+        }
+      },
+
+      onEnd() {
+        this.isPanning = false;
+        this.canvas.style.cursor = 'crosshair';
+        if (this.isDrawing) {
+          this.isDrawing = false;
+          if (this.currentEntity) {
+            this.entities.push(this.currentEntity);
+            this.currentEntity = null;
+            this.saveState();
+          }
+        }
+      },
+
+      onTouchStart(e) {
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          this.isPanning = true;
+          this.isDrawing = false;
+          this.lastPos = {
+            x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+            y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+          };
+          this.touchDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+        } else if (e.touches.length === 1 && this.tool !== 'pan') {
+          e.preventDefault(); // Stop scrolling
+          this.isDrawing = true;
+          const t = e.touches[0];
+          const p = this.toWorld(t.clientX, t.clientY);
+          this.beginEntity(p);
+        }
+      },
+
+      onTouchMove(e) {
+        e.preventDefault();
+        if (this.isPanning && e.touches.length === 2) {
+          // Pan
+          const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          this.camera.x += cx - this.lastPos.x;
+          this.camera.y += cy - this.lastPos.y;
+          this.lastPos = {x: cx, y: cy};
+
+          // Zoom (Pinch)
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          const zoomDelta = dist - this.touchDist;
+          const zoomFactor = 1 + (zoomDelta * 0.005);
+          this.zoomAt(cx, cy, zoomFactor);
+          this.touchDist = dist;
+
+        } else if (this.isDrawing && e.touches.length === 1) {
+          const t = e.touches[0];
+          const p = this.toWorld(t.clientX, t.clientY);
+          this.updateEntity(p);
+        }
+      },
+
+      onWheel(e) {
+        e.preventDefault();
+        // Desktop Zoom
+        const zoomIntensity = 0.1;
+        const direction = e.deltaY < 0 ? 1 : -1;
+        const factor = 1 + (direction * zoomIntensity);
+        this.zoomAt(e.clientX, e.clientY, factor);
+      },
+
+      zoomAt(x, y, factor) {
+        const oldZ = this.camera.z;
+        let newZ = oldZ * factor;
+        newZ = Math.max(0.1, Math.min(newZ, 5)); // Clamp zoom
+
+        // Offset camera to keep mouse pointer stable
+        this.camera.x = x - (x - this.camera.x) * (newZ / oldZ);
+        this.camera.y = y - (y - this.camera.y) * (newZ / oldZ);
+        this.camera.z = newZ;
+
+        this.showStatus(`Zoom: ${Math.round(newZ * 100)}%`);
+      },
+
+      // --- ENTITY LOGIC ---
+      beginEntity(p) {
+        if (this.tool === 'text') {
+          const t = prompt("Idea / Note:");
+          if (t) {
+            this.entities.push({
+              type: 'text', text: t, color: this.color, size: this.size * 5,
+              x: p.x, y: p.y
+            });
+            this.saveState();
+          }
+          this.isDrawing = false;
+          return;
+        }
+
+        this.currentEntity = {
+          type: this.tool,
+          color: this.tool === 'eraser' ? '#13111B' : this.color,
+          size: this.tool === 'eraser' ? this.size * 4 : this.size,
+          pts: [p], // Points array
+          x: p.x, y: p.y, w: 0, h: 0 // For shapes
+        };
+      },
+
+      updateEntity(p) {
+        if (!this.currentEntity) return;
+        const e = this.currentEntity;
+
+        if (e.type === 'pencil' || e.type === 'eraser') {
+          e.pts.push(p);
+        } else {
+          e.w = p.x - e.x;
+          e.h = p.y - e.y;
+        }
+      },
+
+      // --- RENDER LOOP ---
+      loop() {
+        this.render();
+        requestAnimationFrame(() => this.loop());
+      },
+
+      render() {
+        // Clear Background
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.fillStyle = '#13111B';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Apply Camera
+        this.ctx.setTransform(this.camera.z, 0, 0, this.camera.z, this.camera.x, this.camera.y);
+
+        // Draw Grid (Infinite)
+        this.drawGrid();
+
+        // Draw Entities
+        const list = [...this.entities];
+        if (this.currentEntity) list.push(this.currentEntity);
+
+        list.forEach(e => {
+          this.ctx.beginPath();
+          this.ctx.strokeStyle = e.color;
+          this.ctx.fillStyle = e.color;
+          this.ctx.lineWidth = e.size / this.camera.z; // Constant stroke width visually? No, allow zoom. 
+          // Actually standard is stroke scales with zoom. Let's keep native.
+          this.ctx.lineWidth = e.size;
+          this.ctx.lineCap = 'round';
+          this.ctx.lineJoin = 'round';
+
+          if (e.type === 'pencil' || e.type === 'eraser') {
+            if (e.pts.length < 2) return;
+            this.ctx.moveTo(e.pts[0].x, e.pts[0].y);
+            for (let i = 1; i < e.pts.length; i++) this.ctx.lineTo(e.pts[i].x, e.pts[i].y);
+            this.ctx.stroke();
+          }
+          else if (e.type === 'line') {
+            this.ctx.moveTo(e.x, e.y);
+            this.ctx.lineTo(e.x + e.w, e.y + e.h);
+            this.ctx.stroke();
+          }
+          else if (e.type === 'rect') {
+            this.ctx.strokeRect(e.x, e.y, e.w, e.h);
+          }
+          else if (e.type === 'circle') {
+            const r = Math.sqrt(e.w * e.w + e.h * e.h);
+            this.ctx.arc(e.x, e.y, r, 0, Math.PI * 2);
+            this.ctx.stroke();
+          }
+          else if (e.type === 'text') {
+            this.ctx.font = `bold ${e.size}px Outfit`;
+            this.ctx.fillText(e.text, e.x, e.y);
+          }
+        });
+      },
+
+      drawGrid() {
+        const z = this.camera.z;
+        // Fade grid if zoomed out too far
+        if (z < 0.2) return;
+
+        this.ctx.lineWidth = 1 / z;
+        this.ctx.strokeStyle = `rgba(149, 128, 255, ${0.1 * z})`; // Fade logic
+
+        const step = 50;
+        // Calculate visible bounds in World Coords
+        const startX = Math.floor(-this.camera.x / z / step) * step;
+        const startY = Math.floor(-this.camera.y / z / step) * step;
+        const endX = startX + (this.canvas.width / z) + step;
+        const endY = startY + (this.canvas.height / z) + step;
+
+        this.ctx.beginPath();
+        for (let x = startX; x < endX; x += step) {
+          this.ctx.moveTo(x, startY); this.ctx.lineTo(x, endY);
+        }
+        for (let y = startY; y < endY; y += step) {
+          this.ctx.moveTo(startX, y); this.ctx.lineTo(endX, y);
+        }
+        this.ctx.stroke();
+      },
+
+      // --- HISTORY & STATE ---
+      saveState() {
+        // Prune redo history
+        if (this.histIdx < this.history.length - 1) {
+          this.history = this.history.slice(0, this.histIdx + 1);
+        }
+        this.history.push(JSON.stringify(this.entities));
+        this.histIdx++;
+        // Limit history
+        if (this.history.length > 30) {
+          this.history.shift();
+          this.histIdx--;
+        }
+      },
+
+      undo() {
+        if (this.histIdx > 0) {
+          this.histIdx--;
+          this.entities = JSON.parse(this.history[this.histIdx]);
+          this.showStatus("Undo");
+        }
+      },
+
+      redo() {
+        if (this.histIdx < this.history.length - 1) {
+          this.histIdx++;
+          this.entities = JSON.parse(this.history[this.histIdx]);
+          this.showStatus("Redo");
+        }
+      },
+
+      clear() {
+        if (confirm("Purge the ether?")) {
+          this.entities = [];
+          this.saveState();
+        }
+      },
+
+      // --- UI ACTIONS ---
+      setTool(t, btn) {
+        this.tool = t;
+        document.querySelectorAll('.tools .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Toggle props visibility
+        const props = document.getElementById('props');
+        if (t === 'pan' || t === 'eraser') props.classList.remove('visible');
+        else props.classList.add('visible');
+      },
+
+      setColor(c, el) {
+        this.color = c;
+        document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+        el.classList.add('active');
+      },
+
+      setSize(s) {
+        this.size = parseInt(s);
+      },
+
+      showStatus(msg) {
+        const el = document.getElementById('status');
+        el.innerText = msg;
+        el.classList.add('show');
+        clearTimeout(this.statusTimer);
+        this.statusTimer = setTimeout(() => el.classList.remove('show'), 1500);
+      },
+
+      onKey(e) {
+        if (e.ctrlKey && e.key === 'z') {e.preventDefault(); this.undo();}
+        if (e.ctrlKey && e.key === 'y') {e.preventDefault(); this.redo();}
+        // Shortcuts P, L, R, C, T, E, Space
+        const map = {'p': 'pencil', 'l': 'line', 'r': 'rect', 'c': 'circle', 't': 'text', 'e': 'eraser'};
+        if (map[e.key]) {
+          const btn = document.querySelector(`[data-tool="${map[e.key]}"]`);
+          if (btn) btn.click();
+        }
+      },
+
+      io: {
+        save() {
+          const blob = new Blob([JSON.stringify(App.entities)], {type: 'application/json'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = `Aether_Brainstorm_${Date.now()}.json`;
+          a.click();
+        },
+        load(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          const r = new FileReader();
+          r.onload = ev => {
+            try {
+              App.entities = JSON.parse(ev.target.result);
+              App.history = []; App.histIdx = -1; // Reset history on new load
+              App.saveState();
+            } catch (e) {alert("Corrupted Data");}
+          };
+          r.readAsText(file);
+        },
+        export() {
+          // Export current viewport as PNG
+          const link = document.createElement('a');
+          link.download = `Aether_Render_${Date.now()}.png`;
+          link.href = App.canvas.toDataURL("image/png");
+          link.click();
+        }
+      }
+    };
+
+    window.onload = () => App.init();
+  </script>
+</body>
+
+</html>
