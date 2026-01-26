@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProductiveAether | v2.0.0</title>
+    <style>
+        /* 
+         * 1. CSS VARIABLES & THEME ENGINE 
+         * Mapped strictly from AetherAmethyst JSON
+         */
+        :root {
+            /* Typography & Layout */
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'Fira Code', 'Courier New', monospace;
+            --radius-md: 12px;
+            --radius-lg: 24px;
+            --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.1);
+            --transition-speed: 0.3s;
+            
+            /* Eclipse (Default) */
+            --bg: #13111B;
+            --surface: #1B1824;
+            --element: #252130;
+            --active: #2F2942;
+            --border: #2E283B;
+            --text-primary: #EDE8F5;
+            --text-secondary: #9B94A8;
+            --text-muted: #5C5269;
+            --accent-primary: #9580FF;   /* Keyword */
+            --accent-secondary: #FF70B8; /* Function/Error */
+            --accent-tertiary: #80FFEA;  /* Operator/Success */
+            --accent-warn: #E0AF68;
+        }
+
+        /* Bliss Variant Override */
+        [data-theme="bliss"] {
+            --bg: #FDF7FF;
+            --surface: #F4EBFA;
+            --element: #EADCF5;
+            --active: #DCC2F0;
+            --border: #DCC2F0;
+            --text-primary: #3E3245;
+            --text-secondary: #746880;
+            --text-muted: #9E94A8;
+            --accent-primary: #624CAB;
+            --accent-secondary: #D1006B;
+            --accent-tertiary: #008B8B;
+            --accent-warn: #C79200;
+        }
+
+        /* 
+         * 2. RESET & BASE STYLES 
+         */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 
+         * 3. LAYOUT & GRID 
+         */
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 
+         * 4. COMPONENT: CARD 
+         */
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            transition: border-color var(--transition-speed), background-color var(--transition-speed);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 
+         * 5. COMPONENT: TIMER (FocusEngine)
+         */
+        .timer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .timer-circle {
+            position: relative;
+            width: 280px;
+            height: 280px;
+        }
+
+        .timer-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .timer-circle-bg {
+            fill: none;
+            stroke: var(--element);
+            stroke-width: 8;
+        }
+
+        .timer-circle-progress {
+            fill: none;
+            stroke: var(--accent-primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 816; /* 2 * PI * 130 */
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear, stroke var(--transition-speed);
+        }
+
+        .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* 
+         * 6. UI ELEMENTS (Buttons, Inputs) 
+         */
+        button {
+            background: var(--element);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--active);
+            border-color: var(--accent-primary);
+        }
+
+        button.primary {
+            background: var(--accent-primary);
+            color: var(--bg); /* Contrast flip */
+            border: none;
+        }
+
+        button.primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        button.icon-btn {
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        input[type="text"], textarea {
+            background: var(--element);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            width: 100%;
+            font-family: var(--font-main);
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--accent-primary);
+        }
+
+        /* 
+         * 7. COMPONENT: TASKS & NOTES 
+         */
+        .panel-right {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            overflow: hidden;
+        }
+
+        .task-list {
+            list-style: none;
+            overflow-y: auto;
+            flex: 1;
+            margin-top: 1rem;
+            padding-right: 5px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .task-item {
+            background: var(--element);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .task-item.completed {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .task-checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--accent-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .task-checkbox:checked {
+            background: var(--accent-primary);
+        }
+
+        .delete-btn {
+            margin-left: auto;
+            background: transparent;
+            border: none;
+            color: var(--accent-secondary);
+            font-size: 1.2rem;
+            padding: 0;
+        }
+
+        .delete-btn:hover { background: transparent; opacity: 0.7; }
+
+        .notes-area {
+            flex: 1;
+            resize: none;
+            border: none;
+            background: transparent;
+            font-family: var(--font-mono);
+            line-height: 1.6;
+            padding: 0;
+            color: var(--text-secondary);
+        }
+        
+        .notes-area:focus { border: none; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            main { grid-template-columns: 1fr; overflow-y: auto; }
+            #app { height: auto; padding: 1rem; }
+            body { overflow-y: auto; height: auto; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <header>
+            <div class="logo">AetherAmethyst</div>
+            <button class="icon-btn" id="theme-toggle" aria-label="Toggle Theme">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </button>
+        </header>
+
+        <main>
+            <!-- Module 1: Focus Engine (Timer) -->
+            <section class="card">
+                <div class="timer-container">
+                    <div class="timer-circle">
+                        <svg class="timer-svg" viewBox="0 0 300 300">
+                            <circle class="timer-circle-bg" cx="150" cy="150" r="130"></circle>
+                            <circle class="timer-circle-progress" id="timer-progress" cx="150" cy="150" r="130"></circle>
+                        </svg>
+                        <div class="timer-text" id="timer-display">25:00</div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="btn-start" class="primary">Focus</button>
+                        <button id="btn-pause">Pause</button>
+                        <button id="btn-reset">Reset</button>
+                    </div>
+                    <div class="controls" style="margin-top: 1rem;">
+                        <button id="mode-work" style="font-size: 0.8rem">Work</button>
+                        <button id="mode-short" style="font-size: 0.8rem">Short Break</button>
+                        <button id="mode-long" style="font-size: 0.8rem">Long Break</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Module 2 & 3: TaskFlow & ThoughtPad -->
+            <section class="panel-right">
+                <!-- Tasks -->
+                <div class="card" style="flex: 2;">
+                    <h3 style="margin-bottom: 1rem; color: var(--accent-tertiary);">TaskFlow</h3>
+                    <form id="task-form" style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="task-input" placeholder="Add a new task..." autocomplete="off">
+                        <button type="submit" class="primary">+</button>
+                    </form>
+                    <ul class="task-list" id="task-list">
+                        <!-- Tasks injected here -->
+                    </ul>
+                </div>
+
+                <!-- Notes -->
+                <div class="card" style="flex: 1;">
+                    <h3 style="margin-bottom: 0.5rem; color: var(--accent-secondary);">ThoughtPad</h3>
+                    <textarea class="notes-area" id="notes-input" placeholder="Capture your stream of consciousness..."></textarea>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        /**
+         * AetherAmethyst Core Logic
+         * Architecture: Modular Classes with Central Event Bus
+         * Author: Vaylour
+         */
+
+        // --- 1. Utilities & Event Bus ---
+        class EventBus {
+            constructor() { this.events = {}; }
+            on(event, listener) {
+                if (!this.events[event]) this.events[event] = [];
+                this.events[event].push(listener);
+            }
+            emit(event, data) {
+                if (this.events[event]) this.events[event].forEach(l => l(data));
+            }
+        }
+
+        const Bus = new EventBus();
+
+        // --- 2. State Management (Storage) ---
+        class Store {
+            constructor() {
+                this.key = 'productive_aether_data_v2';
+                this.state = this.load();
+            }
+
+            load() {
+                const raw = localStorage.getItem(this.key);
+                return raw ? JSON.parse(raw) : {
+                    theme: 'eclipse',
+                    notes: '',
+                    tasks: [],
+                    timerSettings: { work: 25, short: 5, long: 15 }
+                };
+            }
+
+            save() {
+                localStorage.setItem(this.key, JSON.stringify(this.state));
+            }
+
+            update(key, value) {
+                this.state[key] = value;
+                this.save();
+                Bus.emit('stateChanged', { key, value });
+            }
+        }
+
+        const AppStore = new Store();
+
+        // --- 3. Theme Manager ---
+        class ThemeManager {
+            constructor() {
+                this.btn = document.getElementById('theme-toggle');
+                this.init();
+            }
+
+            init() {
+                this.apply(AppStore.state.theme);
+                this.btn.addEventListener('click', () => this.toggle());
+            }
+
+            apply(theme) {
+                document.body.setAttribute('data-theme', theme);
+                // Update button icon visually via CSS or JS logic if complex
+            }
+
+            toggle() {
+                const current = document.body.getAttribute('data-theme');
+                const next = current === 'eclipse' ? 'bliss' : 'eclipse';
+                this.apply(next);
+                AppStore.update('theme', next);
+            }
+        }
+
+        // --- 4. Focus Engine (Timer Module) ---
+        class FocusEngine {
+            constructor() {
+                this.duration = 25 * 60;
+                this.timeLeft = this.duration;
+                this.timerId = null;
+                this.isRunning = false;
+                this.endTime = null;
+                
+                // DOM
+                this.display = document.getElementById('timer-display');
+                this.progress = document.getElementById('timer-progress');
+                this.circumference = 2 * Math.PI * 130; // r=130
+
+                this.bindEvents();
+                this.render();
+            }
+
+            bindEvents() {
+                document.getElementById('btn-start').addEventListener('click', () => this.start());
+                document.getElementById('btn-pause').addEventListener('click', () => this.pause());
+                document.getElementById('btn-reset').addEventListener('click', () => this.reset());
+
+                document.getElementById('mode-work').addEventListener('click', () => this.setMode(25));
+                document.getElementById('mode-short').addEventListener('click', () => this.setMode(5));
+                document.getElementById('mode-long').addEventListener('click', () => this.setMode(15));
+            }
+
+            setMode(minutes) {
+                this.pause();
+                this.duration = minutes * 60;
+                this.timeLeft = this.duration;
+                this.render();
+            }
+
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.endTime = Date.now() + (this.timeLeft * 1000);
+                
+                this.timerId = setInterval(() => {
+                    const now = Date.now();
+                    const delta = this.endTime - now;
+                    
+                    if (delta <= 0) {
+                        this.timeLeft = 0;
+                        this.complete();
+                    } else {
+                        this.timeLeft = Math.ceil(delta / 1000);
+                    }
+                    this.render();
+                }, 100); // 100ms for smoother UI updates
+            }
+
+            pause() {
+                if (!this.isRunning) return;
+                this.isRunning = false;
+                clearInterval(this.timerId);
+            }
+
+            reset() {
+                this.pause();
+                this.timeLeft = this.duration;
+                this.render();
+            }
+
+            complete() {
+                this.pause();
+                // Play notification sound or visual cue here
+                alert("Focus Session Complete");
+                this.reset();
+            }
+
+            render() {
+                const m = Math.floor(this.timeLeft / 60);
+                const s = this.timeLeft % 60;
+                this.display.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                
+                // Update SVG Circle
+                const offset = this.circumference - (this.timeLeft / this.duration) * this.circumference;
+                this.progress.style.strokeDashoffset = offset;
+                
+                // Update Tab Title
+                document.title = `${m}:${s.toString().padStart(2, '0')} | ProductiveAether`;
+            }
+        }
+
+        // --- 5. TaskFlow (Todo Module) ---
+        class TaskFlow {
+            constructor() {
+                this.tasks = AppStore.state.tasks || [];
+                this.listEl = document.getElementById('task-list');
+                this.form = document.getElementById('task-form');
+                this.input = document.getElementById('task-input');
+                
+                this.render();
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                this.form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.add(this.input.value);
+                });
+            }
+
+            add(text) {
+                if (!text.trim()) return;
+                const task = {
+                    id: Date.now(),
+                    text: text,
+                    completed: false
+                };
+                this.tasks.unshift(task); // Add to top
+                this.input.value = '';
+                this.save();
+                this.render();
+            }
+
+            toggle(id) {
+                const task = this.tasks.find(t => t.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    // Sort: move completed to bottom
+                    this.tasks.sort((a, b) => a.completed - b.completed);
+                    this.save();
+                    this.render();
+                }
+            }
+
+            remove(id) {
+                this.tasks = this.tasks.filter(t => t.id !== id);
+                this.save();
+                this.render();
+            }
+
+            save() {
+                AppStore.update('tasks', this.tasks);
+            }
+
+            render() {
+                this.listEl.innerHTML = '';
+                this.tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                    li.innerHTML = `
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+                        <span>${this.escapeHtml(task.text)}</span>
+                        <button class="delete-btn">×</button>
+                    `;
+                    
+                    // Event Listeners for dynamic elements
+                    li.querySelector('.task-checkbox').addEventListener('change', () => this.toggle(task.id));
+                    li.querySelector('.delete-btn').addEventListener('click', () => this.remove(task.id));
+                    
+                    this.listEl.appendChild(li);
+                });
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // --- 6. ThoughtPad (Notes Module) ---
+        class ThoughtPad {
+            constructor() {
+                this.el = document.getElementById('notes-input');
+                this.el.value = AppStore.state.notes || '';
+                
+                this.el.addEventListener('input', (e) => {
+                    AppStore.update('notes', e.target.value);
+                });
+            }
+        }
+
+        // --- 7. Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            new ThemeManager();
+            new FocusEngine();
+            new TaskFlow();
+            new ThoughtPad();
+        });
+
+    </script>
+</body>
+</html>
