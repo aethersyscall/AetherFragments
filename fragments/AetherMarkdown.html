@@ -6,11 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>AetherMarkdown | Amethyst Engine</title>
 
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- KaTeX CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 
   <style id="aether-styles">
     :root {
@@ -193,7 +195,7 @@
       padding: 40px;
     }
 
-    /* CLEAN MARKDOWN TYPOGRAPHY */
+    /* MARKDOWN TYPOGRAPHY */
     .md-body {
       line-height: 1.8;
       font-size: 16px;
@@ -240,8 +242,6 @@
       color: var(--acc-c);
       font-style: normal;
     }
-
-    /* Highlight for emphasis */
 
     .md-body ul,
     .md-body ol {
@@ -291,7 +291,19 @@
       font-size: 0.9em;
     }
 
-    /* SYNTAX HIGHLIGHTING (High Specificity) */
+    /* KaTeX Theme Adjustments */
+    .katex {
+      font-size: 1.1em !important;
+      color: var(--fg) !important;
+    }
+
+    .katex-display {
+      margin: 1.5em 0 !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    /* SYNTAX HIGHLIGHTING */
     .md-body .hljs-keyword,
     .md-body .hljs-selector-tag {
       color: var(--acc-p);
@@ -315,13 +327,11 @@
       color: #FF9CE6;
     }
 
-    /* Rose */
     .md-body .hljs-number,
     .md-body .hljs-literal {
       color: #C26BFF;
     }
 
-    /* Violet */
     .md-body .hljs-comment,
     .md-body .hljs-quote {
       color: var(--fg-dim);
@@ -373,6 +383,7 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 </head>
 
 <body>
@@ -389,23 +400,20 @@
     <div class="toolbar">
       <button class="btn" id="theme-btn">
         <svg viewBox="0 0 24 24">
-          <path
-            d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" />
+          <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" />
         </svg>
         <span>Theme</span>
       </button>
       <div style="width:1px; height:20px; background:var(--border); margin:0 4px;"></div>
       <button class="btn" onclick="App.exportHTML()">
         <svg viewBox="0 0 24 24">
-          <path
-            d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+          <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
         </svg>
         <span>HTML</span>
       </button>
       <button class="btn primary" onclick="App.exportPDF()">
         <svg viewBox="0 0 24 24">
-          <path
-            d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
+          <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
         </svg>
         <span>PDF</span>
       </button>
@@ -427,7 +435,7 @@
     const App = {
       state: {
         theme: localStorage.getItem('aether_theme') || 'eclipse',
-        content: localStorage.getItem('aether_content') || "# Welcome to Aether\n\nCognitive markdown specifically designed for **focus** and **clarity**.\n\n## Features\n- Live Preview\n- PDF Export\n- HTML Bundle\n\n```cpp\n#include <iostream>\n\nint main() {\n    std::cout << \"Hello Aether\";\n    return 0;\n}\n```"
+        content: localStorage.getItem('aether_content') || "# Aether + Math\n\nCognitive markdown designed for **focus**.\n\n## Math Support\nWe now support LaTeX via KaTeX.\n\n**Inline:** The equation $E=mc^2$ is famous.\n\n**Block:**\n$$\n\\int_{-\\infty}^\\infty e^{-x^2} dx = \\sqrt{\\pi}\n$$\n\n## Code\n```cpp\n#include <iostream>\nint main() {\n    std::cout << \"Hello Aether\";\n}\n```"
       },
       dom: {
         input: document.getElementById('input'),
@@ -438,17 +446,108 @@
       timer: null,
 
       init() {
-        // Robust Renderer Setup
-        const renderer = new marked.Renderer();
-
-        // Override code block rendering to ensure HLJS runs
-        renderer.code = (code, language) => {
-          const validLang = !!(language && hljs.getLanguage(language));
-          const highlighted = validLang ? hljs.highlight(code, {language}).value : code;
-          return `<pre><code class="hljs ${validLang ? 'language-' + language : ''}">${highlighted}</code></pre>`;
+        // --- Marked.js Configuration with Custom KaTeX Tokenizer ---
+        
+        const tokenizer = {
+          // Identify $$ block or $ inline
+          code(src) {
+            // Block Math: $$ ... $$
+            const matchBlock = src.match(/^\$\$([\s\S]+?)\$\$/);
+            if (matchBlock) {
+              return {
+                type: 'katex-block',
+                raw: matchBlock[0],
+                text: matchBlock[1].trim()
+              };
+            }
+            // Fallback to default code tokenizer
+            return false;
+          },
+          inlineText(src) {
+            // Inline Math: $ ... $
+            // Prevent matching if $ is escaped or just a currency symbol
+            const matchInline = src.match(/^\$([^$\n]+?)\$/);
+            if (matchInline) {
+              return {
+                type: 'katex-inline',
+                raw: matchInline[0],
+                text: matchInline[1].trim()
+              };
+            }
+            return false;
+          }
         };
 
-        marked.setOptions({renderer});
+        const renderer = {
+          // Render custom tokens
+          code(token) {
+            // Intercept our custom type if marked parses it as 'code' fallback
+            return false; 
+          }
+        };
+
+        // Extend marked with custom extension
+        marked.use({
+          extensions: [
+            {
+              name: 'katex-block',
+              level: 'block',
+              tokenizer(src) {
+                const match = /^\$\$([\s\S]+?)\$\$/.exec(src);
+                if (match) {
+                  return {
+                    type: 'katex-block',
+                    raw: match[0],
+                    text: match[1].trim()
+                  };
+                }
+              },
+              renderer(token) {
+                try {
+                  return katex.renderToString(token.text, {
+                    displayMode: true,
+                    throwOnError: false
+                  });
+                } catch (err) {
+                  return `<div style="color:var(--acc-k)">Error rendering math</div>`;
+                }
+              }
+            },
+            {
+              name: 'katex-inline',
+              level: 'inline',
+              start(src) { return src.indexOf('$'); },
+              tokenizer(src) {
+                const match = /^\$([^$\n]+?)\$/.exec(src);
+                if (match) {
+                  return {
+                    type: 'katex-inline',
+                    raw: match[0],
+                    text: match[1].trim()
+                  };
+                }
+              },
+              renderer(token) {
+                try {
+                  return katex.renderToString(token.text, {
+                    displayMode: false,
+                    throwOnError: false
+                  });
+                } catch (err) {
+                  return `<span style="color:var(--acc-k)">??</span>`;
+                }
+              }
+            }
+          ]
+        });
+
+        // Set Standard Options (Syntax Highlighting)
+        marked.setOptions({
+          highlight: function(code, lang) {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language }).value;
+          }
+        });
 
         // Load State
         this.setTheme(this.state.theme);
@@ -474,7 +573,9 @@
       render() {
         try {
           this.dom.output.innerHTML = marked.parse(this.state.content);
-        } catch (e) {console.error(e);}
+        } catch (e) {
+          console.error(e);
+        }
       },
 
       save() {
@@ -495,11 +596,14 @@
       exportHTML() {
         const style = document.getElementById('aether-styles').innerHTML;
         const body = this.dom.output.innerHTML;
-        const fileName = `aether-render-${Date.now()}.html`;
+        const fileName = `aether-math-${Date.now()}.html`;
+        
+        // Include KaTeX CSS in export for proper math rendering offline
+        const katexCSS = `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">`;
 
-        const html = `<!DOCTYPE html><html data-theme="${this.state.theme}"><head><meta charset="UTF-8"><title>Export</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=JetBrains+Mono&display=swap" rel="stylesheet"><style>${style} body { overflow-y:auto; padding:40px; display:block; height:auto; } .preview-content { max-width:800px; margin:0 auto; } .theme-fab { position:fixed; bottom:20px; right:20px; background:var(--acc-p); color:#fff; border:none; padding:10px 20px; border-radius:99px; font-family:var(--font-ui); font-weight:700; cursor:pointer; }</style></head><body><div class="md-body preview-content">${body}</div><button class="theme-fab" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'eclipse' ? 'bliss' : 'eclipse'">Switch Theme</button></body></html>`;
+        const html = `<!DOCTYPE html><html data-theme="${this.state.theme}"><head><meta charset="UTF-8"><title>Export</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=JetBrains+Mono&display=swap" rel="stylesheet">${katexCSS}<style>${style} body { overflow-y:auto; padding:40px; display:block; height:auto; } .preview-content { max-width:800px; margin:0 auto; } .theme-fab { position:fixed; bottom:20px; right:20px; background:var(--acc-p); color:#fff; border:none; padding:10px 20px; border-radius:99px; font-family:var(--font-ui); font-weight:700; cursor:pointer; }</style></head><body><div class="md-body preview-content">${body}</div><button class="theme-fab" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'eclipse' ? 'bliss' : 'eclipse'">Switch Theme</button></body></html>`;
 
-        const blob = new Blob([html], {type: 'text/html'});
+        const blob = new Blob([html], { type: 'text/html' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = fileName;
@@ -515,12 +619,11 @@
         const opt = {
           margin: 20,
           filename: `Aether_${Date.now()}.pdf`,
-          image: {type: 'jpeg', quality: 0.98},
-          html2canvas: {scale: 2},
-          jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'}
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Temp switch to light mode for cleaner print
         const current = this.state.theme;
         if (current !== 'bliss') this.setTheme('bliss');
 
