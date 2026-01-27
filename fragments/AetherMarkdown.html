@@ -435,7 +435,7 @@
     const App = {
       state: {
         theme: localStorage.getItem('aether_theme') || 'eclipse',
-        content: localStorage.getItem('aether_content') || "# Aether + Math\n\nCognitive markdown designed for **focus**.\n\n## Math Support\nWe now support LaTeX via KaTeX.\n\n**Inline:** The equation $E=mc^2$ is famous.\n\n**Block:**\n$$\n\\int_{-\\infty}^\\infty e^{-x^2} dx = \\sqrt{\\pi}\n$$\n\n## Code\n```cpp\n#include <iostream>\nint main() {\n    std::cout << \"Hello Aether\";\n}\n```"
+        content: localStorage.getItem('aether_content') || "# AetherMarkdown\n\nCognitive markdown designed for **focus**.\n\n## Math Support\nWe now support LaTeX via KaTeX.\n\n**Inline:** The equation $E=mc^2$ is famous.\n\n**Block:**\n$$\n\\int_{-\\infty}^\\infty e^{-x^2} dx = \\sqrt{\\pi}\n$$\n\n## Syntax Highlighted Code\n```cpp\n#include <iostream>\nint main() {\n    std::cout << \"Hello Aether\";\n}\n```"
       },
       dom: {
         input: document.getElementById('input'),
@@ -446,52 +446,26 @@
       timer: null,
 
       init() {
-        // --- Marked.js Configuration with Custom KaTeX Tokenizer ---
-        
-        const tokenizer = {
-          // Identify $$ block or $ inline
-          code(src) {
-            // Block Math: $$ ... $$
-            const matchBlock = src.match(/^\$\$([\s\S]+?)\$\$/);
-            if (matchBlock) {
-              return {
-                type: 'katex-block',
-                raw: matchBlock[0],
-                text: matchBlock[1].trim()
-              };
-            }
-            // Fallback to default code tokenizer
-            return false;
-          },
-          inlineText(src) {
-            // Inline Math: $ ... $
-            // Prevent matching if $ is escaped or just a currency symbol
-            const matchInline = src.match(/^\$([^$\n]+?)\$/);
-            if (matchInline) {
-              return {
-                type: 'katex-inline',
-                raw: matchInline[0],
-                text: matchInline[1].trim()
-              };
-            }
-            return false;
-          }
+        const renderer = new marked.Renderer();
+
+        // 1. Restore Explicit Code Rendering to Fix Highlighting
+        // This ensures the <code class="hljs ..."> structure required by CSS is present
+        renderer.code = (code, language) => {
+          const validLang = !!(language && hljs.getLanguage(language));
+          const highlighted = validLang ? hljs.highlight(code, { language }).value : code;
+          return `<pre><code class="hljs ${validLang ? 'language-' + language : ''}">${highlighted}</code></pre>`;
         };
 
-        const renderer = {
-          // Render custom tokens
-          code(token) {
-            // Intercept our custom type if marked parses it as 'code' fallback
-            return false; 
-          }
-        };
-
-        // Extend marked with custom extension
+        // 2. Configure Extensions with Robust Tokenization
         marked.use({
+          renderer, // Apply the custom renderer
           extensions: [
             {
               name: 'katex-block',
               level: 'block',
+              // Critical: The 'start' function tells marked where to jump to, preventing 
+              // the math block from being consumed by a preceding paragraph.
+              start(src) { return src.indexOf('$$'); },
               tokenizer(src) {
                 const match = /^\$\$([\s\S]+?)\$\$/.exec(src);
                 if (match) {
@@ -518,6 +492,7 @@
               level: 'inline',
               start(src) { return src.indexOf('$'); },
               tokenizer(src) {
+                // Inline math: $...$
                 const match = /^\$([^$\n]+?)\$/.exec(src);
                 if (match) {
                   return {
@@ -539,14 +514,6 @@
               }
             }
           ]
-        });
-
-        // Set Standard Options (Syntax Highlighting)
-        marked.setOptions({
-          highlight: function(code, lang) {
-            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-            return hljs.highlight(code, { language }).value;
-          }
         });
 
         // Load State
