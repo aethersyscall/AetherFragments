@@ -12,6 +12,18 @@
     ]
   },
   {
+    "id": "neotherial",
+    "title": "Neotherial",
+    "path": "./fragments/Neotherial.html",
+    "description": "Wanna learn neovim motions? I got you covered!",
+    "color": "#008080",
+    "tags": [
+      "Productivity",
+      "Timer",
+      "Tool"
+    ]
+  },
+  {
     "id": "calculus",
     "title": "AetherCalculus",
     "path": "./fragments/AetherCalculus.html",
